@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,12 +26,18 @@ namespace WLED_desktop
         public MainWindow()
         {
             InitializeComponent();
-            
+            try
+            {
+                Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                Assembly curAssembly = Assembly.GetExecutingAssembly();
+                key.SetValue("WLED desktop", curAssembly.Location);
+            }
+            catch { }
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            Hide();
         }
 
         private void Drag_Down(object sender, MouseButtonEventArgs e)
@@ -39,5 +46,9 @@ namespace WLED_desktop
                 DragMove();
         }
 
+        private void Exit(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
     }
 }

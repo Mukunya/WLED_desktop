@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WLED_desktop"
-        xmlns:cef="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+        xmlns:nt="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
         WindowStyle="None"
         BorderThickness="0"
@@ -17,10 +17,13 @@
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignDarkBackground}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        ShowInTaskbar="False" DataContext="{StaticResource vm}">
     <Window.Resources>
-        <local:VM x:Key="vm"></local:VM>
+        
+        <CollectionViewSource Source="{Binding Lights}" x:Key="source"/>
     </Window.Resources>
+    
     <materialDesign:DialogHost IsOpen="{Binding DialogOpen}" DataContext="{StaticResource vm}">
         <materialDesign:DialogHost.DialogContent>
             <materialDesign:Card DataContext="{Binding SelectedLight}" Width="280" Padding="8">
@@ -39,18 +42,36 @@
              </materialDesign:Card>
         </materialDesign:DialogHost.DialogContent>
         <DockPanel>
+
+            <nt:TaskbarIcon IconSource="wled.ico" LeftClickCommand="{Binding ShowWindow}">
+                <nt:TaskbarIcon.ContextMenu>
+                    <ContextMenu Width="500">
+                        <ContextMenu.ItemTemplate>
+                            <DataTemplate>
+                                <MenuItem IsCheckable="True" IsChecked="{Binding IsOn}" Header="{Binding Name}"></MenuItem>
+                            </DataTemplate>
+                        </ContextMenu.ItemTemplate>
+                        <ContextMenu.ItemsSource>
+                            <CompositeCollection>
+                                <MenuItem Header="WLED desktop">
+                                    <MenuItem.Icon>
+                                        <Image Source="wled.ico"></Image>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <CollectionContainer Collection="{Binding Source={StaticResource source}}"  >
+                                </CollectionContainer>
+                                <Separator/>
+                                <MenuItem Header="Exit WLED desktop" Click="Exit" />
+                            </CompositeCollection>
+                        </ContextMenu.ItemsSource>
+                    </ContextMenu>
+                </nt:TaskbarIcon.ContextMenu>
+            </nt:TaskbarIcon>
             <materialDesign:ColorZone DockPanel.Dock="Left" Mode="Dark" Width="256" VerticalAlignment="Stretch" Padding="16">
                 <DockPanel>
-                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-                        <Button
-                            DockPanel.Dock="Right"
-                             ToolTip="Close"
-                             VerticalAlignment="Center"
-                             Content="{materialDesign:PackIcon Kind=RefreshCircle, Size=24}"
-                             Style="{DynamicResource MaterialDesignToolButton}"
-                             Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
-                        <TextBlock VerticalAlignment="Center" MouseDown="Drag_Down" FontSize="20">Lights</TextBlock>
-                    </DockPanel>
+                    <TextBlock DockPanel.Dock="Top" VerticalAlignment="Center" MouseDown="Drag_Down" FontSize="20">Lights</TextBlock>
+                    
                     
                     <Button Command="{Binding NewLight}" DockPanel.Dock="Bottom" Style="{StaticResource MaterialDesignOutlinedButton}">
                         <StackPanel Orientation="Horizontal">
@@ -100,7 +121,6 @@
                 </DockPanel>
             </materialDesign:ColorZone>
             <Grid>
-                <cef:ChromiumWebBrowser Address="{Binding WebSource}"></cef:ChromiumWebBrowser>
             </Grid>
             
             
